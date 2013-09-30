@@ -1,0 +1,14 @@
+{
+    "name": "quafzi/category-migration",
+    "type": "magento-module",
+    "description": "two small shell scripts for category export and category export",
+    "authors": [
+        {
+            "name": "Thomas Birke",
+            "email": "quafzi@netextreme.de"
+        }
+    ],
+    "require": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}
