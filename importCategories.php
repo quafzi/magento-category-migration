@@ -65,9 +65,10 @@ class Mage_Shell_ImportCategories extends Mage_Shell_Abstract
         $category->setMetaTitle($data[16]);
         $category->setMetaKeywords($data[17]);
         $category->setMetaDescription($data[18]);
-        //$category->save();
+        $category->save();
         $category = Mage::getModel('catalog/category')->load($data[0]);
-        echo $category->getId() . PHP_EOL;
+        echo $category->getId() ? $category->getId() : '⚡';
+        echo PHP_EOL;
     }
 
     /**
