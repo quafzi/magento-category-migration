@@ -42,7 +42,7 @@ class Mage_Shell_ExportCategories extends Mage_Shell_Abstract
         }
     }
 
-    protected function exportData($category, $file, $depth=0)
+    protected function exportData(Mage_Catalog_Model_Category $category, $file, $depth=0)
     {
         $data = array(
             'id'               => $category->getId(),
