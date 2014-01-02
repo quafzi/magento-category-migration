@@ -29,7 +29,7 @@ class Mage_Shell_ImportCategories extends Mage_Shell_Abstract
                 fclose($file);
             }
         } else {
-            $this->usageHelp();
+            echo $this->usageHelp();
         }
     }
 
