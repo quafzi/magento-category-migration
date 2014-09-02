@@ -19,30 +19,64 @@ class Mage_Shell_ExportCategories extends Mage_Shell_Abstract
     public function run()
     {
         $rootCategoryIds = array();
-        if ($this->getArg('roots')) {
+        if ($this->getArg('roots'))
+        {
             // e.g.  "2,148,147,150,146,590,235,1007,1032,867,1056"
             $rootCategoryIds = explode(',', $this->getArg('roots'));
         }
-        if (false === count($rootCategoryIds)) {
+        
+        if (false === count($rootCategoryIds))
+        {
             die ('Please provide at least one root category id. (E.g. --roots 1,3,595)');
         }
 
-        if ($this->getArg('file')) {
+        if($this->getArg('file'))
+        {
             $path = $this->getArg('file');
-            echo 'writing data to ' . $path . PHP_EOL;
+            
+            $this->debug('writing data to ' . $path . PHP_EOL);
+            
             $file = fopen($path, 'w');
-            foreach ($rootCategoryIds as $categoryId) {
+            
+            foreach ($rootCategoryIds as $categoryId)
+            {
+                //load our root category
                 $category = Mage::getModel('catalog/category')->load($categoryId);
-                echo '* ' . $category->getName() . sprintf(' (%s products)', $category->getProductCount()) . PHP_EOL;
+                
+                //start recursion
                 $this->exportData($category, $file);
             }
             fclose($file);
-        } else {
+        }
+        else
+        {
             echo $this->usageHelp();
         }
     }
 
     protected function exportData(Mage_Catalog_Model_Category $category, $file, $depth=0)
+    {
+        
+        $data = $this->getDataArray($category);
+        
+        //debug output
+        $out = str_repeat('  ', $depth); $out .= '* ' . $category->getName() . sprintf(' (%s products)', $category->getProductCount()) . PHP_EOL; $this->debug($out);
+        
+        fputcsv($file, $data);
+        if ($category->hasChildren())
+        {            
+            //$children = Mage::getModel('catalog/category')->getCategories($category->getId());
+            //get children of [default category][children categories]            
+            $children = $category->getChildrenCategories();
+            foreach ($children as $child)
+            {
+                    $this->exportData($child, $file, $depth+1);
+                    $child = Mage::getModel('catalog/category')->load($child->getId());
+            }
+        }
+    }
+    
+    public function getDataArray($category)
     {
         $data = array(
             'id'               => $category->getId(),
@@ -65,16 +99,16 @@ class Mage_Shell_ExportCategories extends Mage_Shell_Abstract
             'metaKeywords'     => $category->getMetaKeywords(),
             'metaDescription'  => $category->getMetaDescription(),
         );
-        echo str_repeat('  ', $depth);
-        echo '* ' . $category->getName() . sprintf(' (%s products)', $category->getProductCount()) . PHP_EOL;
-        fputcsv($file, $data);
-        if ($category->hasChildren()) {
-            $children = Mage::getModel('catalog/category')->getCategories($category->getId());
-            foreach ($children as $child) {
-                $child = Mage::getModel('catalog/category')->load($child->getId());
-                $this->exportData($child, $file, $depth+1);
-            }
-        }
+        
+        return $data;
+    }
+    
+    /*
+    *log debug output
+    */
+    public function debug($str)
+    {
+        echo $str;
     }
 
     /**
@@ -94,3 +128,4 @@ USAGE;
 
 $shell = new Mage_Shell_ExportCategories();
 $shell->run();
+
