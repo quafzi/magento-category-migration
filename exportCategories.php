@@ -69,7 +69,12 @@ class Mage_Shell_ExportCategories extends Mage_Shell_Abstract
         echo '* ' . $category->getName() . sprintf(' (%s products)', $category->getProductCount()) . PHP_EOL;
         fputcsv($file, $data);
         if ($category->hasChildren()) {
-            $children = Mage::getModel('catalog/category')->getCategories($category->getId());
+            $children = Mage::getModel('catalog/category')
+                ->load($category->getId())
+                ->getCollection()
+                ->addAttributeToSort('position', 'ASC')
+                ->addFieldToFilter('parent_id', $category->getId());
+
             foreach ($children as $child) {
                 $child = Mage::getModel('catalog/category')->load($child->getId());
                 $this->exportData($child, $file, $depth+1);
